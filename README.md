@@ -24,7 +24,7 @@ This environment simulates a 9-hour workday calendar (09:00–18:00) divided int
 
 ```
 openenv_scheduler/
-├── env/                    # Core environment package
+├── core_env/               # Core environment package
 │   ├── __init__.py         # Re-exports key classes
 │   ├── models.py           # Pydantic models (Action, Observation, Reward, etc.)
 │   ├── scheduler.py        # SchedulingEnv — the main OpenEnv environment

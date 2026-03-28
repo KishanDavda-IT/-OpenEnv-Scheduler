@@ -32,7 +32,7 @@ docker run -p 8000:8000 -p 7860:7860 scheduling-env
 ## Architecture
 
 ```
-env/                    # Core environment (OpenEnv-compliant)
+core_env/               # Core environment (OpenEnv-compliant)
   models.py             # Pydantic models: Action, Observation, Reward, Meeting, ScheduledEvent, TaskConfig
   scheduler.py          # SchedulingEnv class with reset(), step(), state() methods
   grader.py             # Deterministic scorer returning 0.0–1.0
