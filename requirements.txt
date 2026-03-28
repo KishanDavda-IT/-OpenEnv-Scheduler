@@ -1,5 +1,5 @@
-fastapi
-uvicorn
-pydantic
-gradio
-requests
+fastapi==0.109.0
+uvicorn==0.27.0
+pydantic==2.5.3
+gradio==4.44.1
+requests==2.31.0

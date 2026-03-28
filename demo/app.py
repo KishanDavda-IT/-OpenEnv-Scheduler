@@ -132,10 +132,10 @@ def run_agent(task_id):
         # Score Context
         score_color = "#10b981" if score >= 0.8 else "#f59e0b" if score > 0.4 else "#ef4444"
         score_md = f"""
-<div class='score-box'>
-    <h2 style='text-align: center; color: {score_color}; font-size: 3.5rem; margin: 0;'>{score * 100:.1f}%</h2>
-    <p style='text-align: center; font-weight: bold; margin: 0; color: #4b5563;'>Task Success Score</p>
-    <p style='text-align: center; margin: 5px 0 0 0; font-size: 0.9em; color: gray;'>Expected Score Range: {expected}</p>
+<div style='border: 1px solid #ddd; padding: 15px; border-radius: 8px; text-align: center;'>
+    <h2 style='color: {score_color}; font-size: 3rem; margin: 0;'>{score * 100:.1f}%</h2>
+    <p style='font-weight: bold; margin: 0;'>Task Success Score</p>
+    <p style='margin: 5px 0 0 0; font-size: 0.9em; color: gray;'>Expected Score Range: {expected}</p>
 </div>
 """
 
@@ -191,17 +191,13 @@ def run_agent(task_id):
         return cal_data if cal_data else [], exp_str, score_md, info_out, summary_md, issues_md
         
     except Exception as e:
-        err_box = f"<div class='score-box'><h2 style='color:red;text-align:center;'>Error</h2><p>{str(e)}</p></div>"
+        err_box = f"<div style='border: 1px solid red; padding: 20px; border-radius: 8px;'><h2 style='color:red;text-align:center;'>Error</h2><p>{str(e)}</p></div>"
         return [], "", err_box, "", "", ""
 
-custom_css = """
-.gradio-container { font-family: 'Inter', sans-serif; }
-.score-box { border-radius: 8px; background: #f9fafb; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; margin: auto; max-width: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-"""
-
-with gr.Blocks() as demo:
+with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue", neutral_hue="slate")) as demo:
     gr.HTML("<h1 style='text-align: center; margin-bottom: 0;'>🤖 OpenEnv Scheduling AI</h1>")
     gr.HTML("<p style='text-align: center; color: gray; margin-top: 0;'>Reinforcement Learning Environment for Calendar Optimization</p>")
+    gr.Markdown("✔ **System Status: API Server Online**")
     
     with gr.Row():
         with gr.Column(scale=1):
@@ -211,7 +207,7 @@ with gr.Blocks() as demo:
             btn = gr.Button("🚀 Run RL Baseline Agent", variant="primary")
             
             gr.HTML("<hr style='margin-top: 20px; margin-bottom: 20px;'>")
-            score_out = gr.HTML("<div class='score-box'><h2 style='text-align: center; color: gray; font-size: 2.5rem; margin: 0;'>-</h2><p style='text-align: center; margin: 0;'>Task Success Score</p></div>")
+            score_out = gr.HTML("<div style='border: 1px solid #ddd; padding: 15px; border-radius: 8px; text-align: center;'><h2 style='color: gray; font-size: 2.5rem; margin: 0;'>-</h2><p style='margin: 0;'>Task Success Score</p></div>")
             
             with gr.Accordion("📋 Analytics Dashboard", open=True):
                 summary_out = gr.Markdown("Run an agent to populate summary metrics.")
@@ -228,4 +224,4 @@ with gr.Blocks() as demo:
     task_dropdown.change(fn=lambda tid: "🟢 **EASY:** Straightforward scheduling with wide optimization availability." if "easy" in tid else "🟡 **MEDIUM:** Unavoidable trade-offs, preference conflicts, constraints." if "medium" in tid else "🔴 **HARD:** Mathematically impossible scenario forcing critical prioritization skips.", inputs=[task_dropdown], outputs=[task_info_md])
 
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=7860, theme=gr.themes.Soft(primary_hue="blue", neutral_hue="slate"), css=custom_css)
+    demo.launch(server_name="0.0.0.0", server_port=7860)
