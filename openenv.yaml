@@ -1,0 +1,39 @@
+name: openenv-scheduler
+version: "1.0"
+description: "A deterministic RL environment where AI agents schedule meetings on a 9-hour calendar while respecting constraints."
+
+tasks:
+  - id: task_1_easy
+    name: Simple Placement
+    difficulty: easy
+    description: "Schedule 1 meeting with no fixed events."
+
+  - id: task_2_medium
+    name: Constrained Scheduling
+    difficulty: medium
+    description: "Schedule 4 meetings with 1 fixed standup, lunch avoidance and overlapping preferences."
+
+  - id: task_3_hard
+    name: Impossible Fit
+    difficulty: hard
+    description: "Schedule 6 meetings with 2 fixed events — total slots exceed calendar, forcing smart skips."
+
+action_space:
+  type: discrete
+  n: 20
+  description: "Slots 0-17 place meeting, 18=skip, 19=reschedule"
+
+observation_space:
+  type: structured
+  fields:
+    - calendar
+    - current_meeting
+    - remaining_meetings
+    - valid_slots
+
+reward_range: [0.0, 1.0]
+
+endpoints:
+  reset: POST /reset
+  step: POST /step
+  state: GET /state
