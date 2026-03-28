@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+
+# VS Code
+.vscode/
+
+# Project Specific
+*.txt
+!requirements.txt
+tests/qa_output.txt
+tests/latest_scores*.txt
+tests/debug_*.txt
+tests/demo_run_results.txt
+tests/qa_report.md
+.env
+.ipynb_checkpoints
+*checkpoint*
