@@ -5,14 +5,20 @@ echo "🚀 Starting OpenEnv API on port 8000..."
 uvicorn api.app:app --host 0.0.0.0 --port 8000 > api_logs.txt 2>&1 &
 
 echo "⏳ Waiting for API to be ready..."
-for i in {1..10}; do
-  if curl -s http://127.0.0.1:8000/tasks > /dev/null; then
-    echo "✅ API is up and running!"
-    break
-  fi
-  echo "...waiting..."
-  sleep 2
-done
+python3 -c "
+import requests, time
+for i in range(15):
+    try:
+        if requests.get('http://127.0.0.1:8000/tasks').status_code == 200:
+            print('✅ API is up and running!')
+            exit(0)
+    except:
+        pass
+    print(f'...waiting ({i+1})...')
+    time.sleep(2)
+print('❌ API failed to start in time!')
+exit(1)
+" || (echo "📝--- API ERROR LOGS ---"; cat api_logs.txt; exit 1)
 
 echo "🎨 Starting Gradio Dashboard on port 7860..."
 python demo/app.py
