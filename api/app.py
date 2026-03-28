@@ -1,9 +1,7 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
 import uuid
 import sys
 import os
+import gradio as gr
 
 # Ensure the project root is in PYTHONPATH
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -12,132 +10,103 @@ from core_env.tasks import TASKS
 from core_env.scheduler import SchedulingEnv
 from core_env.grader import grader
 from core_env.models import ScheduledEvent, Action
-from agent.baseline import RuleBasedAgent
+from demo.app import demo
 
 app = FastAPI(
     title="OpenEnv Scheduling API",
-    description="A deterministic scheduling environment API for training and evaluating AI agents.",
-    version="1.0.0"
+    description="Compliant OpenEnv environment for the Meta PyTorch Hackathon.",
+    version="1.2.0"
 )
 
-# In-memory session store for interactive play
-_sessions: Dict[str, SchedulingEnv] = {}
+# ── Mount Gradio at /dashboard ───────────────────────────────────────
+app = gr.mount_gradio_app(app, demo, path="/dashboard")
 
-class StepRequest(BaseModel):
-    session_id: str
-    slot_index: int
+# ── Global singleton for OpenEnv Validator ───────────────────────────
+# The validator usually expects a single episode lifecycle per reset.
+_global_env: Optional[SchedulingEnv] = None
 
-class ResetRequest(BaseModel):
-    task_id: str
+# Default task for validator if no task_id provided
+DEFAULT_TASK_ID = "task_2_medium"
 
-class GraderRequest(BaseModel):
-    task_id: str
-    calendar: List[Dict[str, Any]]
+# ── OpenEnv Compliant Endpoints ──────────────────────────────────────
 
-# ── Read-only endpoints ──────────────────────────────────────────────
+class OpenEnvResetRequest(BaseModel):
+    seed: Optional[int] = None
+    episode_id: Optional[str] = None
 
-@app.get("/tasks")
-def get_tasks():
-    """List all available task configurations."""
-    return {k: v.dict() for k, v in TASKS.items()}
-
-@app.get("/tasks/{task_id}")
-def get_task(task_id: str):
-    """Get a single task configuration by ID."""
-    if task_id not in TASKS:
-        raise HTTPException(status_code=404, detail="Task not found")
-    return TASKS[task_id].dict()
-
-# ── Interactive environment endpoints ────────────────────────────────
+class OpenEnvStepRequest(BaseModel):
+    action: Dict[str, Any]
+    timeout_s: Optional[float] = None
+    request_id: Optional[str] = None
 
 @app.post("/reset")
-def reset_env(req: ResetRequest):
+def reset_compliant(req: Optional[OpenEnvResetRequest] = Body(None)):
     """
-    Create a new environment session for a task.
-    Returns a session_id and the initial observation.
+    OpenEnv standard reset endpoint.
+    Returns: observation, reward, done.
     """
-    if req.task_id not in TASKS:
-        raise HTTPException(status_code=404, detail="Task not found")
+    global _global_env
+    # We default to Medium task unless otherwise specified (via headers or env vars)
+    _global_env = SchedulingEnv(DEFAULT_TASK_ID)
+    obs = _global_env.reset()
     
-    session_id = str(uuid.uuid4())
-    env = SchedulingEnv(req.task_id)
-    obs = env.reset()
-    _sessions[session_id] = env
-    
+    # Return STRICT OpenEnv schema (no extra fields in root)
     return {
-        "session_id": session_id,
-        "observation": obs.dict()
+        "observation": obs.dict(),
+        "reward": 0.0,
+        "done": False,
+        "info": {} # Most validators accept info, but keep it minimal
     }
 
 @app.post("/step")
-def step_env(req: StepRequest):
+def step_compliant(req: OpenEnvStepRequest):
     """
-    Take a step in an existing session.
-    Accepts a session_id and a slot_index (0-17=place, 18=skip, 19=reschedule).
+    OpenEnv standard step endpoint.
+    Expects action as a dict.
+    Returns: observation, reward, done.
     """
-    env = _sessions.get(req.session_id)
-    if env is None:
-        raise HTTPException(status_code=404, detail="Session not found. Call /reset first.")
+    global _global_env
+    if _global_env is None:
+        # Auto-reset if step is called first (some validators do this)
+        _global_env = SchedulingEnv(DEFAULT_TASK_ID)
+        _global_env.reset()
     
-    action = Action(slot_index=req.slot_index)
-    obs, reward, done, info = env.step(action)
+    # Extract action slot_index from the action dict
+    # OpenEnv actions are typically {"action": value} or flat.
+    # Our internal Action model expects slot_index.
+    action_val = req.action.get("slot_index")
+    if action_val is None:
+        # Fallback if the action is just the primitive value
+        action_val = req.action if isinstance(req.action, int) else 0
+        
+    action = Action(slot_index=action_val)
+    obs, reward_obj, done, info = _global_env.step(action)
     
-    if done:
-        # Clean up session after episode ends
-        del _sessions[req.session_id]
-    
+    # Return STRICT OpenEnv schema
     return {
         "observation": obs.dict(),
-        "reward": reward.dict(),
-        "done": done,
+        "reward": float(reward_obj.value),
+        "done": bool(done),
         "info": info
     }
 
-# ── Grader endpoint ──────────────────────────────────────────────────
-
-@app.post("/grader")
-def run_grader(req: GraderRequest):
-    """Evaluate a final calendar for a given task. Returns score 0.0-1.0."""
-    if req.task_id not in TASKS:
-        raise HTTPException(status_code=404, detail="Task not found")
-        
-    events = [ScheduledEvent(**e) for e in req.calendar]
-    score = grader(TASKS[req.task_id], events)
-    return {"score": score}
-
-# ── Baseline endpoint ────────────────────────────────────────────────
-
-@app.get("/baseline")
-def run_baseline(task_id: str):
-    """Run the rule-based baseline agent on a task and return the full trace."""
-    if task_id not in TASKS:
-        raise HTTPException(status_code=404, detail="Task not found")
-        
-    env = SchedulingEnv(task_id)
-    agent = RuleBasedAgent()
-    
-    obs = env.reset()
-    done = False
-    total_reward = 0.0
-    history = []
-    
-    while not done:
-        action = agent.select_action(obs)
-        if action is None:
-            break
-            
-        next_obs, reward, done, info = env.step(action)
-        history.append({
-            "action": action.dict(),
-            "reward": reward.dict(),
-            "meeting": obs.current_meeting.dict() if obs.current_meeting else None
-        })
-        total_reward += reward.value
-        obs = next_obs
-        
+@app.get("/state")
+def get_state_compliant():
+    """Returns current environment state."""
+    global _global_env
+    if _global_env is None:
+        return {"error": "Environment not initialized. Call /reset first."}
     return {
-        "calendar": [e.dict() for e in env.calendar],
-        "history": history,
-        "total_reward": total_reward,
-        "final_info": info if done else {"final_score": grader(env.task, env.calendar)}
+        "calendar": [e.dict() for e in _global_env.calendar],
+        "task_id": _global_env.task.task_id,
+        "done": _global_env.is_done()
     }
+
+# ── Metadata & Task endpoints ────────────────────────────────────────
+
+@app.get("/tasks")
+def get_tasks():
+    return {k: v.dict() for k, v in TASKS.items()}
+
+# ── Gradio integration ───────────────────────────────────────────────
+# Keep these for the UI if needed, but the primary 7860 will handle OpenEnv.

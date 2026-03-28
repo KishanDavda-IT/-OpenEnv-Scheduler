@@ -1,23 +1,10 @@
 #!/bin/bash
 export PYTHONPATH=$PYTHONPATH:.
+export API_URL="http://127.0.0.1:7860"
 
-echo "🚀 Starting OpenEnv API on port 8000..."
-uvicorn api.app:app --host 0.0.0.0 --port 8000 &
+echo "🚀 Starting OpenEnv Compliant Server on port 7860..."
+echo "📊 Dashboard will be available at: /dashboard"
 
-echo "⏳ Waiting for API to be ready..."
-python3 -c "
-import requests, time, sys
-for i in range(15):
-    try:
-        if requests.get('http://127.0.0.1:8000/tasks').status_code == 200:
-            print('✅ API is up and running!')
-            sys.exit(0)
-    except Exception:
-        pass
-    print(f'...waiting ({i+1})...')
-    time.sleep(2)
-sys.exit(1)
-" || (echo "❌ API failed to start in time!"; exit 1)
-
-echo "🎨 Starting Gradio Dashboard on port 7860..."
-python demo/app.py
+# Run FastAPI (which now includes the mounted Gradio UI)
+# We use 7860 because it's the default port for Hugging Face Spaces and the OpenEnv validator.
+uvicorn api.app:app --host 0.0.0.0 --port 7860
