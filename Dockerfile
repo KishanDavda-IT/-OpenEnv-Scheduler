@@ -15,10 +15,7 @@ RUN pip install --no-cache-dir --user -r requirements.txt
 # Copy everything else
 COPY --chown=user . $HOME/app
 
-# Ensure run.sh is executable
-RUN chmod +x run.sh
-
 # HF Spaces Docker SDK expects port 7860
-EXPOSE 7860 8000
+EXPOSE 7860
 
-CMD ["./run.sh"]
+CMD ["python", "start.py"]
