@@ -32,7 +32,7 @@ class OpenEnvResetRequest(BaseModel):
     episode_id: Optional[str] = None
 
 class OpenEnvStepRequest(BaseModel):
-    action: Dict[str, Any]
+    action: Optional[Any] = None
     timeout_s: Optional[float] = None
     request_id: Optional[str] = None
 
@@ -49,17 +49,21 @@ def reset_compliant(req: Optional[OpenEnvResetRequest] = Body(None)):
     }
 
 @app.post("/step")
-def step_compliant(req: OpenEnvStepRequest):
+def step_compliant(req: Optional[OpenEnvStepRequest] = Body(None)):
     global _global_env
     if _global_env is None:
         _global_env = SchedulingEnv(DEFAULT_TASK_ID)
         _global_env.reset()
     
-    action_val = req.action.get("slot_index")
-    if action_val is None:
-        action_val = req.action if isinstance(req.action, int) else 0
+    # Robust action extraction
+    action_val = 18 # Default to SKIP if everything fails
+    if req and req.action is not None:
+        if isinstance(req.action, dict):
+            action_val = req.action.get("slot_index", req.action.get("action", 18))
+        else:
+            action_val = req.action
         
-    action = Action(slot_index=action_val)
+    action = Action(slot_index=int(action_val))
     obs, reward_obj, done, info = _global_env.step(action)
     
     return {
