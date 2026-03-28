@@ -1,3 +1,12 @@
+---
+title: OpenEnv Scheduler
+emoji: 🤖
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+pinned: false
+---
+
 # 🤖 OpenEnv Scheduler
 
 > An OpenEnv-compliant Scheduling Assistant environment for the **Meta PyTorch OpenEnv Hackathon**.  
