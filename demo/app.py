@@ -195,7 +195,7 @@ custom_css = """
 .score-box { border-radius: 8px; background: #f9fafb; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; margin: auto; max-width: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 """
 
-with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue", neutral_hue="slate"), css=custom_css) as demo:
+with gr.Blocks() as demo:
     gr.HTML("<h1 style='text-align: center; margin-bottom: 0;'>🤖 OpenEnv Scheduling AI</h1>")
     gr.HTML("<p style='text-align: center; color: gray; margin-top: 0;'>Reinforcement Learning Environment for Calendar Optimization</p>")
     
@@ -224,4 +224,4 @@ with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue", neutral_hue="slate"), cs
     task_dropdown.change(fn=lambda tid: "🟢 **EASY:** Straightforward scheduling with wide optimization availability." if "easy" in tid else "🟡 **MEDIUM:** Unavoidable trade-offs, preference conflicts, constraints." if "medium" in tid else "🔴 **HARD:** Mathematically impossible scenario forcing critical prioritization skips.", inputs=[task_dropdown], outputs=[task_info_md])
 
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=7860)
+    demo.launch(server_name="0.0.0.0", server_port=7860, theme=gr.themes.Soft(primary_hue="blue", neutral_hue="slate"), css=custom_css)
