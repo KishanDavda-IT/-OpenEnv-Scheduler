@@ -12,7 +12,7 @@ for i in range(15):
         if requests.get('http://127.0.0.1:8000/tasks').status_code == 200:
             print('✅ API is up and running!')
             sys.exit(0)
-    except:
+    except Exception:
         pass
     print(f'...waiting ({i+1})...')
     time.sleep(2)
