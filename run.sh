@@ -2,7 +2,7 @@
 export PYTHONPATH=$PYTHONPATH:.
 
 echo "🚀 Starting OpenEnv API on port 8000..."
-uvicorn api.app:app --host 0.0.0.0 --port 8000 > api_logs.txt 2>&1 &
+uvicorn api.app:app --host 0.0.0.0 --port 8000 &
 
 echo "⏳ Waiting for API to be ready..."
 python3 -c "
