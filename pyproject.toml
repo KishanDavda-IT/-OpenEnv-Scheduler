@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openenv-scheduler"
+version = "1.0.0"
+description = "A deterministic RL environment for the Meta PyTorch OpenEnv Hackathon."
+readme = "README.md"
+authors = [{ name = "Kishan Davda" }]
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi==0.109.0",
+    "uvicorn==0.27.0",
+    "pydantic==2.5.3",
+    "gradio==4.44.1",
+    "requests==2.31.0",
+    "huggingface_hub==0.24.7",
+]
+
+[project.urls]
+Homepage = "https://huggingface.co/spaces/kishandavda/OpenEnv-Scheduler"
+
+[tool.setuptools]
+packages = ["core_env", "agent", "api", "demo"]
