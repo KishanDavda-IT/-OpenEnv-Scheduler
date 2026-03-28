@@ -1,10 +1,10 @@
 import sys
 sys.path.append('.')
 
-from env.scheduler import SchedulingEnv
-from env.models import Action
+from core_env.scheduler import SchedulingEnv
+from core_env.models import Action
 from agent.baseline import RuleBasedAgent
-from env.tasks import TASKS
+from core_env.tasks import TASKS
 
 print("=== 1. CALL RESET & PRINT STATE ===")
 env = SchedulingEnv('task_2_medium')

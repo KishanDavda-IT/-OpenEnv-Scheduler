@@ -1,4 +1,4 @@
-from env.models import Observation, Action
+from core_env.models import Observation, Action
 from typing import Optional
 
 class RuleBasedAgent:

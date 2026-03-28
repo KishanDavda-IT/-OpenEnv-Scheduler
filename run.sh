@@ -18,7 +18,7 @@ for i in range(15):
     time.sleep(2)
 print('❌ API failed to start in time!')
 exit(1)
-" || (echo "📝--- API ERROR LOGS ---"; cat api_logs.txt; exit 1)
+" || (echo "❌ API failed to start in time!"; exit 1)
 
 echo "🎨 Starting Gradio Dashboard on port 7860..."
 python demo/app.py

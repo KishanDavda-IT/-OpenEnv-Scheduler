@@ -2,10 +2,10 @@ import sys
 import traceback
 sys.path.append('.')
 
-from env.scheduler import SchedulingEnv
-from env.models import Action, Meeting, TaskConfig, ScheduledEvent
-from env.tasks import TASKS
-from env.grader import grader
+from core_env.scheduler import SchedulingEnv
+from core_env.models import Action, Meeting, TaskConfig, ScheduledEvent
+from core_env.tasks import TASKS
+from core_env.grader import grader
 from agent.baseline import RuleBasedAgent
 
 report = []

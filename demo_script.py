@@ -11,10 +11,10 @@ Usage:
 import sys
 sys.path.insert(0, '.')
 
-from env.scheduler import SchedulingEnv
-from env.tasks import TASKS
-from env.grader import grader
-from env.models import Action
+from core_env.scheduler import SchedulingEnv
+from core_env.tasks import TASKS
+from core_env.grader import grader
+from core_env.models import Action
 from agent.baseline import RuleBasedAgent
 
 SLOT_TO_TIME = {i: f"{9 + (i * 30) // 60:02d}:{(i * 30) % 60:02d}" for i in range(19)}

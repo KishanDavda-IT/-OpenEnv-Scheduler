@@ -6,6 +6,7 @@ import sys
 # Ensure project root is in PYTHONPATH
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from core_env.tasks import TASKS
 API_URL = os.environ.get("API_URL", "http://127.0.0.1:8000")
 
 SLOT_TO_TIME = {i: f"{9 + (i * 30) // 60:02d}:{(i * 30) % 60:02d}" for i in range(19)}

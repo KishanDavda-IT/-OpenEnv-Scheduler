@@ -8,10 +8,10 @@ import os
 # Ensure the project root is in PYTHONPATH
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from env.tasks import TASKS
-from env.scheduler import SchedulingEnv
-from env.grader import grader
-from env.models import ScheduledEvent, Action
+from core_env.tasks import TASKS
+from core_env.scheduler import SchedulingEnv
+from core_env.grader import grader
+from core_env.models import ScheduledEvent, Action
 from agent.baseline import RuleBasedAgent
 
 app = FastAPI(
