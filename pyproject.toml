@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "A deterministic RL environment for the Meta PyTorch OpenEnv Hackathon."
 readme = "README.md"
 authors = [{ name = "Kishan Davda" }]
-requires-python = ">=3.9"
+requires-python = ">=3.12"
 dependencies = [
   "fastapi>=0.109.0",
   "uvicorn>=0.27.0",
@@ -16,10 +16,11 @@ dependencies = [
   "gradio>=4.44.1",
   "requests>=2.31.0",
   "huggingface_hub>=0.24.7",
+  "openenv-core>=0.2.0",
 ]
 
 [project.scripts]
-openenv-server = "server.app:app"
+server = "server.app:main"
 
 [project.urls]
 Homepage = "https://huggingface.co/spaces/kishandavda/OpenEnv-Scheduler"
