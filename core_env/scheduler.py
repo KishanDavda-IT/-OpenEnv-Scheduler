@@ -134,9 +134,9 @@ class SchedulingEnv:
                         reward_value -= 5.0
                         reason.append("Pref missed")
                         
-                # Avoid Lunch (slots 6-9 = 12:00-14:00)
+                # Avoid Lunch (slots 6-7 = 12:00-13:00)
                 if self.current_meeting.avoid_lunch:
-                    if any(s in [6, 7, 8, 9] for s in range(slot, end_slot)):
+                    if any(s in [6, 7] for s in range(slot, end_slot)):
                         reward_value -= 10.0
                         reason.append("Lunch overlap")
                 

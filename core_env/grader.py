@@ -85,10 +85,10 @@ def grader(task: TaskConfig, final_calendar: List[ScheduledEvent]) -> float:
         else:
             pref_penalty += 0.015
             
-        # Lunch avoidance check (slots 6-9 = 12:00-14:00)
+        # Lunch avoidance check (slots 6-7 = 12:00-13:00)
         lunch_conflict = False
         if m.avoid_lunch:
-            if any(s in [6, 7, 8, 9] for s in range(e.start_slot, e.end_slot)):
+            if any(s in [6, 7] for s in range(e.start_slot, e.end_slot)):
                 lunch_conflict = True
         if not lunch_conflict:
             constraint_hits += 1

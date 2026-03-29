@@ -17,7 +17,7 @@ class Meeting(BaseModel):
     duration_slots: int  
     preferred_start_window: Optional[List[int]] = None  
     priority: int = 1  
-    avoid_lunch: bool = False  # Lunch is slots 6-9 (12:00 to 14:00)
+    avoid_lunch: bool = False  # Lunch is slots 6-7 (12:00 to 13:00)
 
 class ScheduledEvent(BaseModel):
     meeting_id: str

@@ -185,7 +185,7 @@ def run_agent(task_id):
         rules_md = "### 📜 Active Constraints Overview\n"
         lunch_avoiders = sum(1 for m in meetings if m.get("avoid_lunch"))
         if lunch_avoiders > 0:
-            rules_md += f"- 🛑 **Lunch Avoidance**: {lunch_avoiders} meetings strictly avoid 12:00-14:00.\n"
+            rules_md += f"- 🛑 **Lunch Avoidance**: {lunch_avoiders} meetings strictly avoid 12:00-13:00.\n"
         if fixed_events:
             rules_md += f"- 📌 **Fixed Events**: {len(fixed_events)} immovable event(s) block calendar slots.\n"
         if sum(m.get('duration_slots', 0) for m in meetings) > 18:

@@ -30,7 +30,7 @@ class RuleBasedAgent:
                 
             # 2. Avoid lunch constraint
             if meeting.avoid_lunch:
-                if any(s in [6, 7, 8, 9] for s in range(slot, slot + meeting.duration_slots)):
+                if any(s in [6, 7] for s in range(slot, slot + meeting.duration_slots)):
                     score -= 5
             
             # 3. Efficiency / Compactness heuristics
