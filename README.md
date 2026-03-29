@@ -14,38 +14,61 @@ pinned: false
 
 ---
 
-## 📋 Project Plan
+## Hackathon alignment
 
-This environment simulates a 9-hour workday calendar (09:00–18:00) divided into 30-minute slots. An AI agent receives meeting requests and must place them optimally while navigating constraints like lunch breaks, preferred time windows, priority conflicts, and fixed immovable events. The environment provides dense rewards for each action and a deterministic final score (0.0–1.0) via a built-in grader.
+| Requirement | How this repo satisfies it |
+|-------------|----------------------------|
+| **Clear scheduling tasks** | Three tasks in `core_env/tasks.py` + `openenv.yaml`: easy (wide window), medium (standup + lunch + overlapping preferences), hard (overbooked calendar → prioritize / skip). |
+| **Grader / evaluation** | `core_env/grader.py` — deterministic `grader(task, calendar) → float` in **[0, 1]** (coverage, conflicts, priority, constraints, efficiency). **`POST /grader`** evaluates any full calendar for a task. |
+| **Reward logic** | `SchedulingEnv.step()` — dense rewards for valid placement, preference match/miss, lunch violation, fragmentation; penalties for skip, invalid placement, reschedule. |
+| **OpenEnv-style interface** | Typed **Pydantic** `Action` / `Observation` / `Reward`; **`reset()`**, **`step(action)`**, **`state()`** on `SchedulingEnv`; HTTP **`POST /reset`**, **`POST /step`**, **`GET /state`**; spec in **`openenv.yaml`**. Optional **`openenv-core`**: `pip install ".[openenv]"`. |
+| **Working demo (Spaces)** | Gradio UI is mounted on the FastAPI app at **`/`**; Spaces runs **`start.py`** on port **7860**. **Live Space:** [OpenEnv-Scheduler on Hugging Face](https://huggingface.co/spaces/kishandavda/OpenEnv-Scheduler). |
+| **Offline demo** | **`python demo_script.py`** — baseline agent on all three tasks; uses only `core_env` + `agent` (no network). |
+| **Submission package** | Public **GitHub** repo, **`requirements.txt`**, **`demo_script.py`**, this **README**, deployed **Spaces URL** (link above). |
+
+**Round 1 deadline:** 7 April 2026, 11:59 PM IST (latest push before deadline is evaluated).
 
 ---
 
-## 📁 Folder Structure
+## 📋 Project plan
+
+The workday is **09:00–18:00** in **18** half-hour slots (indices **0 … 17**). Each slot covers **[09:00 + 30×i min, 09:00 + 30×(i+1) min)**. Events use **[`start_slot`, `end_slot`)** with **exclusive** `end_slot` (standard conflict test: `start < e.end_slot and end > e.start_slot`). **Place** action uses a **start slot** index; the meeting occupies **`duration_slots` contiguous slots**. **Special actions:** `18` = skip, `19` = reschedule last placement.
+
+---
+
+## Slot index → start time
+
+| Slot | Start time | Slot | Start time |
+|:---:|:---:|:---:|:---:|
+| 0 | 09:00 | 9 | 13:30 |
+| 1 | 09:30 | 10 | 14:00 |
+| 2 | 10:00 | 11 | 14:30 |
+| 3 | 10:30 | 12 | 15:00 |
+| 4 | 11:00 | 13 | 15:30 |
+| 5 | 11:30 | 14 | 16:00 |
+| **6** | **12:00** (lunch) | 15 | 16:30 |
+| **7** | **12:30** (lunch) | 16 | 17:00 |
+| 8 | 13:00 | 17 | 17:30 |
+
+---
+
+## 📁 Folder structure
 
 ```
 openenv_scheduler/
-├── core_env/               # Core environment package
-│   ├── __init__.py         # Re-exports key classes
-│   ├── models.py           # Pydantic models (Action, Observation, Reward, etc.)
-│   ├── scheduler.py        # SchedulingEnv — the main OpenEnv environment
-│   ├── grader.py           # Deterministic grader (0.0 to 1.0)
-│   └── tasks.py            # Easy, Medium, Hard task definitions
-├── agent/                  # Agent implementations
-│   ├── __init__.py         # Re-exports RuleBasedAgent
-│   └── baseline.py         # Greedy rule-based baseline agent
-├── api/                    # FastAPI backend
-│   ├── __init__.py
-│   └── app.py              # REST API endpoints
-├── demo/                   # Gradio web UI
-│   ├── __init__.py
-│   └── app.py              # Gradio Blocks app (port 7860)
-├── tests/                  # QA test suite
-│   └── qa.py               # 10+ automated validation tests
-├── demo_script.py          # Standalone demo script (no Docker needed)
-├── requirements.txt        # Python dependencies
-├── Dockerfile              # Container build file
-├── run.sh                  # Entrypoint script (API + Gradio)
-└── README.md               # This file
+├── core_env/               # Environment (models, SchedulingEnv, grader, tasks)
+├── agent/                  # Baseline agent
+├── server/                 # FastAPI + Gradio mounted at /
+│   └── app.py
+├── demo/                   # Gradio Blocks definition imported by server
+├── tests/                  # qa.py
+├── demo_script.py          # Offline demo (no Docker / no API)
+├── inference.py            # Validator-oriented episode loop
+├── openenv.yaml            # Task and interface summary
+├── requirements.txt
+├── Dockerfile
+├── start.py                # uvicorn server.app:app (port 7860)
+└── README.md
 ```
 
 ---
@@ -62,7 +85,7 @@ openenv_scheduler/
 | **3 Agent Actions** | Place a meeting, Skip/reject a meeting, Reschedule the last placement |
 | **Baseline Agent** | Rule-based greedy agent demonstrating environment usage |
 | **Gradio Demo** | Interactive web UI visualizing calendar, agent decisions, and scores |
-| **FastAPI Backend** | Programmatic API for running scenarios and interactive play |
+| **FastAPI backend** | Programmatic API (`server/app.py`) + Gradio on the same port |
 | **HF Spaces Ready** | Deployable to Hugging Face Spaces via Docker |
 
 ---
@@ -139,26 +162,23 @@ Observation(
 
 ### Option 1: Direct Python (fastest)
 ```bash
-# Install dependencies
 pip install -r requirements.txt
+# Optional: pip install ".[openenv]"  # OpenEnv meta-package for extra tooling
 
-# Run the standalone demo (no servers needed)
 python demo_script.py
 
-# Or start the API + Gradio servers
-uvicorn api.app:app --host 0.0.0.0 --port 8000 &
-python demo/app.py
+# API + Gradio (same process; UI at /, OpenAPI at /docs)
+uvicorn server.app:app --host 0.0.0.0 --port 7860
 ```
 
 ### Option 2: Docker
 ```bash
 docker build -t scheduling-env .
-docker run -p 8000:8000 -p 7860:7860 scheduling-env
+docker run -p 7860:7860 scheduling-env
 ```
 
-### Access Points
-- **API Docs**: http://localhost:8000/docs
-- **Gradio Demo**: http://localhost:7860
+### Access points (local)
+- **Gradio + API**: http://localhost:7860 — **API docs**: http://localhost:7860/docs
 
 ---
 
@@ -170,20 +190,15 @@ docker run -p 8000:8000 -p 7860:7860 scheduling-env
 | `GET` | `/tasks/{task_id}` | Get a single task |
 | `POST` | `/reset` | Start a new interactive session |
 | `POST` | `/step` | Take an action in an active session |
-| `POST` | `/grader` | Evaluate a final calendar for a task |
+| `POST` | `/grader` | Body: `{"task_id": "...", "calendar": [ ScheduledEvent, ... ]}` → `final_score` in [0,1] |
 | `GET` | `/baseline` | Run the baseline agent on a task |
 
-### Interactive API Usage Example
+### Interactive API usage
 ```bash
-# Start a session
-curl -X POST http://localhost:8000/reset \
-  -H "Content-Type: application/json" \
-  -d '{"task_id": "task_1_easy"}'
+curl -s -X POST http://localhost:7860/reset -H "Content-Type: application/json" -d "{\"task_id\": \"task_1_easy\"}"
 
-# Take a step (place meeting at slot 2 = 10:00)
-curl -X POST http://localhost:8000/step \
-  -H "Content-Type: application/json" \
-  -d '{"session_id": "<SESSION_ID>", "slot_index": 2}'
+# Place current meeting at slot 2 (10:00): action must be nested
+curl -s -X POST http://localhost:7860/step -H "Content-Type: application/json" -d "{\"action\": {\"slot_index\": 2}}"
 ```
 
 ---

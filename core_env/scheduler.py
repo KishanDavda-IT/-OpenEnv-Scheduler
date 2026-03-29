@@ -63,6 +63,7 @@ class SchedulingEnv:
         )
         
     def _has_conflict(self, start: int, end: int, exclude_meeting_id: str = None) -> bool:
+        # Interval overlap on half-open [start, end) vs [e.start_slot, e.end_slot)
         for e in self.calendar:
             if exclude_meeting_id and e.meeting_id == exclude_meeting_id:
                 continue

@@ -132,6 +132,21 @@ def run_baseline_agent(task_id: str):
         "final_info": info if done else {"final_score": grader(env.task, env.calendar)}
     }
 
+
+class GraderRequest(BaseModel):
+    """Full calendar state (fixed + agent-placed) as list of ScheduledEvent dicts."""
+    task_id: str
+    calendar: List[Dict[str, Any]]
+
+
+@app.post("/grader")
+def post_grader(body: GraderRequest):
+    if body.task_id not in TASKS:
+        raise HTTPException(status_code=404, detail="Task not found")
+    cal = [ScheduledEvent(**evt) for evt in body.calendar]
+    score = grader(TASKS[body.task_id], cal)
+    return {"task_id": body.task_id, "final_score": score}
+
 # ── Mount Gradio at root (/) ──────────────────────────────────────────
 # IMPORTANT: All FastAPI routes must be defined BEFORE this mount.
 app = gr.mount_gradio_app(app, demo, path="/")

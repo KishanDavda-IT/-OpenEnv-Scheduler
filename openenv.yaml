@@ -31,9 +31,13 @@ observation_space:
     - remaining_meetings
     - valid_slots
 
+# grader() and terminal info["final_score"] live in this range.
+# Per-step Reward.value from env.step() is dense shaping (unbounded).
 reward_range: [0.0, 1.0]
+final_score_range: [0.0, 1.0]
 
 endpoints:
   reset: POST /reset
   step: POST /step
   state: GET /state
+  grader: POST /grader

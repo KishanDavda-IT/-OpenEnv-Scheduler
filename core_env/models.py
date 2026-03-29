@@ -1,3 +1,14 @@
+"""
+Domain models for OpenEnv Scheduler.
+
+Time discretization (unambiguous):
+  - Workday 09:00–18:00 is 18 half-hour slots indexed 0..17.
+  - Slot i covers wall time [09:00 + i*30min, 09:00 + (i+1)*30min).
+  - Events use half-open intervals [start_slot, end_slot): end_slot is exclusive.
+  - Valid start indices for a meeting of duration_slots D are 0 .. 17-D (inclusive).
+  - Lunch (for avoid_lunch): slots 6 and 7 only (12:00–13:00). Overlap if any
+    scheduled slot s with start <= s < end satisfies s in {6, 7}.
+"""
 from pydantic import BaseModel
 from typing import List, Optional
 

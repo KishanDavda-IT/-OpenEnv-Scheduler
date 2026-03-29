@@ -1,5 +1,5 @@
-# Runtime deps only — openenv-core is optional (see pyproject [openenv]) and pulls
-# openai/fastmcp etc., which can make HF Spaces Docker builds hang or OOM.
+# Minimal runtime deps for demo, API, and Hugging Face Docker (fast install).
+# openenv-core pulls openai/fastmcp etc. and can stall Spaces builds — optional: pip install ".[openenv]"
 fastapi>=0.109.0
 uvicorn>=0.27.0
 pydantic>=2.5.3

@@ -18,15 +18,12 @@ python demo_script.py
 # Run tests
 python tests/qa.py
 
-# Start API server (port 8000)
-uvicorn api.app:app --host 0.0.0.0 --port 8000
-
-# Start Gradio UI (port 7860)
-python demo/app.py
+# API + Gradio (recommended)
+uvicorn server.app:app --host 0.0.0.0 --port 7860
 
 # Docker build and run
 docker build -t scheduling-env .
-docker run -p 8000:8000 -p 7860:7860 scheduling-env
+docker run -p 7860:7860 scheduling-env
 ```
 
 ## Architecture
@@ -41,8 +38,8 @@ core_env/               # Core environment (OpenEnv-compliant)
 agent/
   baseline.py           # RuleBasedAgent — greedy heuristic baseline
 
-api/app.py              # FastAPI endpoints: /tasks, /reset, /step, /grader, /baseline
-demo/app.py             # Gradio web UI on port 7860
+server/app.py           # FastAPI + Gradio: /tasks, /reset, /step, /grader, /baseline
+demo/app.py             # Gradio Blocks definition (mounted by server)
 demo_script.py          # Standalone demo without server dependencies
 tests/qa.py             # 13 validation tests
 ```

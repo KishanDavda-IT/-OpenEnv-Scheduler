@@ -9,6 +9,14 @@ Usage:
     python demo_script.py
 """
 import sys
+
+# Windows terminals often default to cp1252; keep UTF-8 output consistent.
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 sys.path.insert(0, '.')
 
 from core_env.scheduler import SchedulingEnv
