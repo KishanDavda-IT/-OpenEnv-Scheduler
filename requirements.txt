@@ -1,5 +1,6 @@
-# Minimal runtime deps for demo, API, and Hugging Face Docker (fast install).
-# openenv-core pulls openai/fastmcp etc. and can stall Spaces builds — optional: pip install ".[openenv]"
+# Required by OpenEnv validator (multi-mode deployment). Keep >=0.2.0.
+openenv-core>=0.2.0
+
 fastapi>=0.109.0
 uvicorn>=0.27.0
 pydantic>=2.5.3

@@ -21,7 +21,7 @@ pinned: false
 | **Clear scheduling tasks** | Three tasks in `core_env/tasks.py` + `openenv.yaml`: easy (wide window), medium (standup + lunch + overlapping preferences), hard (overbooked calendar → prioritize / skip). |
 | **Grader / evaluation** | `core_env/grader.py` — deterministic `grader(task, calendar) → float` in **[0, 1]** (coverage, conflicts, priority, constraints, efficiency). **`POST /grader`** evaluates any full calendar for a task. |
 | **Reward logic** | `SchedulingEnv.step()` — dense rewards for valid placement, preference match/miss, lunch violation, fragmentation; penalties for skip, invalid placement, reschedule. |
-| **OpenEnv-style interface** | Typed **Pydantic** `Action` / `Observation` / `Reward`; **`reset()`**, **`step(action)`**, **`state()`** on `SchedulingEnv`; HTTP **`POST /reset`**, **`POST /step`**, **`GET /state`**; spec in **`openenv.yaml`**. Optional **`openenv-core`**: `pip install ".[openenv]"`. |
+| **OpenEnv-style interface** | Typed **Pydantic** `Action` / `Observation` / `Reward`; **`reset()`**, **`step(action)`**, **`state()`** on `SchedulingEnv`; HTTP **`POST /reset`**, **`POST /step`**, **`GET /state`**; spec in **`openenv.yaml`**. **`openenv-core>=0.2.0`** is listed in **`requirements.txt`** for validator / multi-mode deployment. |
 | **Working demo (Spaces)** | Gradio UI is mounted on the FastAPI app at **`/`**; Spaces runs **`start.py`** on port **7860**. **Live Space:** [OpenEnv-Scheduler on Hugging Face](https://huggingface.co/spaces/kishandavda/OpenEnv-Scheduler). |
 | **Offline demo** | **`python demo_script.py`** — baseline agent on all three tasks; uses only `core_env` + `agent` (no network). |
 | **Submission package** | Public **GitHub** repo, **`requirements.txt`**, **`demo_script.py`**, this **README**, deployed **Spaces URL** (link above). |
@@ -163,7 +163,6 @@ Observation(
 ### Option 1: Direct Python (fastest)
 ```bash
 pip install -r requirements.txt
-# Optional: pip install ".[openenv]"  # OpenEnv meta-package for extra tooling
 
 python demo_script.py
 
