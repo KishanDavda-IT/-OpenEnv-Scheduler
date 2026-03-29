@@ -16,8 +16,10 @@ dependencies = [
   "gradio>=4.44.1",
   "requests>=2.31.0",
   "huggingface_hub>=0.24.7",
-  "openenv-core>=0.2.0",
 ]
+
+[project.optional-dependencies]
+openenv = ["openenv-core>=0.2.0"]
 
 [project.scripts]
 server = "server.app:main"

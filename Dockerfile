@@ -1,10 +1,11 @@
-FROM python:3.10-slim
+FROM python:3.12-slim
 
 # Set up a new user with UID 1000
 RUN useradd -m -u 1000 user
 USER user
 ENV HOME=/home/user \
-    PATH=/home/user/.local/bin:$PATH
+    PATH=/home/user/.local/bin:$PATH \
+    GRADIO_SERVER_NAME=0.0.0.0
 
 WORKDIR $HOME/app
 

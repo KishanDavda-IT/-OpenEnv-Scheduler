@@ -44,7 +44,11 @@ class SchedulingEnv:
         self._last_placed_meeting = None  # Track last placement for reschedule
         
         return self.state()
-        
+
+    def is_done(self) -> bool:
+        """True when all meetings have been processed (episode terminal)."""
+        return self.current_meeting is None
+
     def state(self) -> Observation:
         if self.current_meeting is None:
             valid_slots = []

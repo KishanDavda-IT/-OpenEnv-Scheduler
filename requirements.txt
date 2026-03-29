@@ -1,7 +1,8 @@
+# Runtime deps only — openenv-core is optional (see pyproject [openenv]) and pulls
+# openai/fastmcp etc., which can make HF Spaces Docker builds hang or OOM.
 fastapi>=0.109.0
 uvicorn>=0.27.0
 pydantic>=2.5.3
 gradio>=4.44.1
 requests>=2.31.0
 huggingface_hub>=0.24.7
-openenv-core>=0.2.0
